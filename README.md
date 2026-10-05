@@ -233,6 +233,10 @@ Filled in automatically: `session_id`, `timestamp_utc`, `member`, `machine_id`, 
 
 Before submitting, run `make check`. It runs the tests and checks that the results file, machines, CORE runs, required experiments, and incident reports are all present and well formed. Graders run the same command.
 
+## Working on the Project
+
+One team member will need to create a new repo based on this template repo.  Then add your team members as collaborators.  Add Dr. Fontenot (MarkFontenot on Github) as a collaborator.  We will send out info for how TAs will access your code. 
+
 ## Rules
 
 - I expect you to fully understand, line by line, and *be able to explain in person* anything you submit with your name on it.
