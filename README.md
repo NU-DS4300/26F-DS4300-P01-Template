@@ -1,6 +1,6 @@
 # DS4300 · Fall 2026 · Practical 1: Index It (Spotify edition)
 
-**Due:** TBD (see Canvas). **Teams:** 2–3 students; teams of 4 have one extra requirement (E7).
+**Due:** Nov 3, 2026 @ 11:59 pm EST. **Teams:** 3 - 4 students; teams of 5 have one extra requirement (E7).
 
 ## The scenario
 
@@ -229,7 +229,7 @@ Filled in automatically: `session_id`, `timestamp_utc`, `member`, `machine_id`, 
    - `machines.csv`
    - `incident_reports/INC-*.md`
    - `analysis/`: the notebook(s) that produce every figure and table in your report
-2. **PDF report** on Gradescope.
+2. **PDF report** on Gradescope. (structure and format forthcoming)
 
 Before submitting, run `make check`. It runs the tests and checks that the results file, machines, CORE runs, required experiments, and incident reports are all present and well formed. Graders run the same command.
 
