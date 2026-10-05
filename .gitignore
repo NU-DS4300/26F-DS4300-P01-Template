@@ -1,53 +1,17 @@
-# build artifacts
-
-.eggs/
-.mypy_cache
-*.egg-info/
-build/
-dist/
-pip-wheel-metadata/
-
-
-# dev tools
-
-.envrc
-.python-version
-.idea
-.venv/
-.vscode/
-/*.iml
-pyrightconfig.json
-
-
-# jupyter notebooks
-
-.ipynb_checkpoints
-
-
-# miscellaneous
-
-.cache/
-doc/_build/
-*.swp
-.DS_Store
-
+# dataset: never commit
+data/
 
 # python
-
-*.pyc
-*.pyo
-__pycache__
-
-
-# testing and continuous integration
-
-.coverage
+__pycache__/
+*.py[cod]
 .pytest_cache/
-.benchmarks
+.venv/
 
-# documentation build artifacts
+# jupyter
+.ipynb_checkpoints/
 
-docs/build
-site/
-
-attic.bak
+# editors / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp

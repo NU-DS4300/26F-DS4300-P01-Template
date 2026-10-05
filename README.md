@@ -1,137 +1,242 @@
-# DS4300 - Spring 2025 - Practical #1 - Index It
+# DS4300 · Fall 2026 · Practical 1: Index It (Spotify edition)
 
-This is the template repository for Practical #1.
+**Due:** TBD (see Canvas). **Teams:** 2–3 students; teams of 4 have one extra requirement (E7).
 
-#### Due Date:
+## The scenario
 
-- EC Due Date: February 2nd, 2025 @ 11:59pm
-- Regular Due Date: February 4th, 2025 @ 11:59pm
+You've just joined the data platform team at a music streaming startup. The product team wants four features, and each one needs an *index*: a data structure that answers a particular kind of question without scanning every track.
 
-## Important Notes:
+This isn't the first attempt. In **summer 2024**, a team of interns got this same assignment: find the best index structure for each feature and back the choice with data. They vibe coded it. They prompted an AI assistant, accepted what it produced, and moved on as soon as the tests went green. Then the summer ended, and the project has sat untouched since.
 
-- [ ] What to submit where?
-  - [ ] Implementation project should be submitted through GitHub/GH Classroom.
-  - [ ] Written portion should be submitted via GradeScope.
+| Feature | The question it asks | Key column | Query type |
+|---|---|---|---|
+| **F1 Track page** | "Show me track `5SuOikwiRyPMVoIQDJUgSV`." Some links are stale, so some IDs don't exist. | `track_id` | point lookup (hits and misses) |
+| **F2 Search-as-you-type** | The user has typed `lov`. Which titles start with that? | `track_name` | prefix |
+| **F3 Workout mode** | "Songs between 125 and 135 BPM." | `tempo` | range |
+| **F4 Catalog import** | Every night, new tracks are added. How long does that take, and does the order they arrive in matter? | any | insert / build |
 
-**Group Work**
+The interns were supposed to recommend an index for each feature and back each recommendation with data. They never got there. The candidates they were comparing:
 
-You may complete this practical in teams of 2 students or 3 students. I will consider teams of 4, but there will be extra requirements for teams of 4.
+| Index | File | One-line idea |
+|---|---|---|
+| Unsorted list (baseline) | `indexes/unsorted_list.py` | No index at all: append everything, scan everything |
+| Sorted list | `indexes/sorted_list.py` | Keep keys sorted; binary search |
+| Hash table | `indexes/hash_table.py` | Like a Python `dict`: jump straight to a bucket |
+| AVL tree | `indexes/avl_tree.py` | Self-balancing binary search tree |
+| B+ tree | `indexes/bplus_tree.py` | Short, wide tree with linked leaves; what databases use |
+| *Reference:* `dict` | `indexes/reference.py` | Python's built-in hash table (written in C) |
+| *Reference:* `bisect` | `indexes/reference.py` | Sorted list using Python's C binary search |
 
-**Reminder**
+The reference indexes are not candidates. They show what the same ideas cost when the code runs in C rather than Python, which is part of your analysis.
 
-- I expect you to fully understand (at the level of each line of code) and _be able to explain in-person_ anything you submit with your name on it.
-  - What does this mean for coding assistants and LLMs? If used appropriately, these can be amazing tools to aid in your understanding and comprehension of material as well as assist you in coding and debugging. It is no more or less wrong to blindly copy and paste code from an coding assistant/LLM as it would be to copy and paste from existing code on GitHub or from a text book. If you don't understand it and can't explain it, then you should not submit it.
-  - If you find code online or from a coding assistant that you are struggling to interpret or understand what is going on conceptually, all you have to do is ask me or one of the TAs. I'll gladly help you interpret things.
+### What the interns left behind
 
-## Assignment Overview
+Their handoff note, verbatim:
 
-### Scenario (Hypothetical)
+> "Indexes are done, all tests pass. Didn't get to most of the benchmarks, but there's one example experiment. The B+ tree is the one real databases use, so it's probably the answer for everything? Datagen is stubbed out. Good luck!"
+> — Summer 2024 intern team
 
-You're working for a researcher who is trying to build a specialized search engine over a large corpus of documents. The researcher ultimately need a fast way to search through thousands of documents for specific words or phrases and the total number of documents that contain the word or phrase and total number of pre-processed words in those documents.
+Here's what's actually in the repo:
 
-The first step is to evaluate the performance of several different in-memory indexing data structures so that you can make an informed decision on which data structure to use. The researcher has provided you with a dataset of news articles and asked you to evaluate the performance of the data structures with respect to searching.
+- **An index library** (`indexes/`) that returns correct answers: every test in `tests/test_indexes.py` passes. Nobody ever measured how fast it is, and nobody on the team could explain all of it.
+- **A synthetic data generator** (`datagen/synthetic.py`) that is only function signatures and docstrings.
+- **One benchmark experiment** (`bench/experiments.py`) out of the six they planned. No results, no analysis, no recommendations.
 
-Good news - you'll benefit from the work of the previous research assistant who just accepted a co-op. The had already implemented the bulk of the BST, a portion of the AVL tree, and has set up a repository already!
+Your team is picking up where they left off: **review their work, fix what's wrong, finish what's missing, and make the recommendations they never made.** Treat their handoff note as a set of claims to test, not facts.
 
-### Your Task
+> **Don't trust the interns' index code.** It contains bugs that affect performance but not correctness. Every index returns the right answers, but some are slower than they should be. We are not telling you how many bugs there are or where they are. Finding them through your data is part of the assignment (Part D).
 
-Using the sample dataset of finance-related news articles from 2018, you'll build indexes of varying sizes (number of documents) for each of the following data structures:
+## Getting started
 
-- Binary Search Tree (BST)
-- AVL Tree
-- Hash Table
-- An indexing data structure of your choice
-
-You'll then run experiments to evaluate the performance of each data structure with respect to searching for a single word and/or a set of words.
-
-After collecting a sufficient amount of data, you'll analyze to draw conclusions about the relative performance of each data structure. You'll make a recommendation to the researcher on which data structure to use for their search engine (with supporting data and analysese) in the form of a research report.
-
-### DataSet
-
-**Link to dataset will be pinned in the class Slack Channel.**
-
-**DO NOT EVER PUT THE DATASET IN YOUR REPO FOLDER. We do NOT want it pushed to GitHub.**
-
-The input corpus is based on the [US Financial News Articles](https://www.kaggle.com/datasets/jeet2016/us-financial-news-articles) Kaggle Dataset. It is a collection of finance-related news articles from Jan - May 2018. Each news article is stored in a separate JSON file containing metadata about the article as well as its full text. The full text has been pre-processed to remove stop words, remove any tokens composed of only digits and decimal points, and lemmatized.
-
-## Requirements
-
-1. Implement indexers based on the template repository using the following data structures:
-   - Binary Search Tree (BST)
-   - AVL Tree
-   - Hash Table
-   - An indexing data structure of your choice
-1. Crawl the folders of news articles and extract important metadata from each article as well as the `preprocessed_text` element. (Do not index the `text` element.) As you're parsing the new articles, store each word in the indexing structure you are currently testing along with the filename as the value. For the purpose of the project, you should extract, parse, and index the following metadata:
-   - title
-   - source URL's domain name (cnn.com, reuters.com, etc.)
-   - author's last name if present
-1. Generate >= 8 searching data sets of varying sizes, each with the following components:
-   - **Component A**: a random sample of _n_ terms/tokens currently in the index (n should be a multiple of 4 and >= 4000),
-   - **Component B**: an additional _(n/4)_ 2- and 3-word phrases added to the search set by randomly selecting 2 or 3 tokens from Component A and adding them to the searching data set,
-   - **Component C**: an addition of _n_ randomly generated strings of characters that are unlikely to be in the index, and
-   - **Component D**: an additional _(n/4)_ 2- and 3-word phrases to the set by randomly selecting 2 or 3 tokens from Component C and adding them to the searching data set
-   - **Shuffle each of the searching data sets before using them in the experiments below.**
-   -
-1. Design and implement a set of experiments to evaluate the performance of each data structure with respect to searching for tokens from the searching data sets. Take into consideration the information that is to be included in the final report so that you collect the correct data. For each run of an experiment, measure the time it takes to search the current data structure for the tokens in the searching data sets. Collect the data into a csv file that you will submit with your report.
-
-## Implementation Details and Considerations
-
-- I have included a decorator in `indexer.util.timer` that tracks the execution time of a function in nanoseconds and milliseconds. You are free to use it directly or modify it for your needs. OR, you can implement your own timer function to track performance data in some other Pythonic way if you'd like.
-
-- You'll use the following data structures as indexes for this project:
-  - Binary Search Tree (already implemented for you, but you can modify it if you'd like)
-  - AVL Tree (started for you)
-  - Hash Table (custom implementation, primary functions stubbed out for you. Don't simply use a Python dictionary.)
-  - A 4th indexing data structure of your choice
-- You can modify the nodes of each of the data structures to include additional data if you'd like.
-
-- File storage/locations:
-
-  - **DO NOT EVER PUT THE DATASET IN YOUR REPO.**
-  - Once you've fully implemented your indexing data structures and created a full index, you can store them in a pickle file for use in the experiments. This will save you from having to re-index the corpus every time you run an experiment. **Do NOT put the pickle files in your repo.**
-  - The path to the root folder of the dataset is currently a variable in `assign_01.py`. You should convert this to a command line argument that can be passed in when running the program.
-    - `-d` or `--dataset` for example.
-  - If you pickle your indexes, you can have a separate command line argument for the path to the pickle files.
-    - `-p` or `--pickle` for example.
-
-- The implementations of the data structures should be consistent with the explanations covered in lecture.
-
-- Each of the data structures should inherit from a common interface of functionality in `indexer.abstract_index.AbstractIndex`. Those for which I've provided a full or partial implementation already do.
-
-- Each data structure should conceptually manage an inverted index for the corpus (or a subset of it). In this case, the inverted index will map individual words (after they've been preprocessed) to a list of documents in which that word appears.
-
-- The time needed to construct the index should NOT be included in the searching timing data you collect.
-
-### Python Environment
-
-- Your implementation should run with Python 3.11. To create a new conda environment with python 3.11, run the following:
+You need [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker Engine on Linux) and `git`. Everything else runs inside the container, so every team member and every grader has the same Python, packages, and settings.
 
 ```bash
-conda create -n <new_env_name> python=3.11
+make build      # build the image (once, and again if requirements.txt changes)
+make data       # download the Spotify dataset into data/ (checksum verified)
+make test       # run the tests; tests/test_synthetic.py fails until you finish Part B
+make lab        # JupyterLab at http://127.0.0.1:8888 for your analysis
+make shell      # a bash shell inside the container
 ```
 
-Subsequently, install additional packages listed in the requirements.txt file with:
+No `make` (e.g. Windows PowerShell)? Every target in the `Makefile` is a single `docker compose run --rm app ...` command you can paste.
+
+Your code lives on your laptop and is mounted into the container at `/project`, so edit with any editor and rerun. **Never commit `data/`**; it is git-ignored.
+
+### The dataset
+
+The [Spotify Tracks Dataset](https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset) has 114,000 tracks across 114 genres, with 20 columns. `make data` downloads a pinned copy from the Hugging Face mirror. `loaders/spotify.py` reads it and turns any column into `(key, row_id)` pairs:
+
+```python
+from loaders.spotify import load_tracks, key_value_pairs
+tracks = load_tracks()
+pairs = key_value_pairs(tracks, "tempo")      # [(87.917, 0), (77.489, 1), ...]
+```
+
+Read the docstring of `loaders/spotify.py`: some of these columns behave in ways that matter for your results.
+
+## What's in the repo
+
+| Path | Who wrote it | Purpose |
+|---|---|---|
+| `indexes/` | the interns, **contains bugs** | The index library. You will fix bugs here (Part D). `reference.py` and `base.py` are fine; do not modify them. |
+| `loaders/` | provided | Download and load the Spotify data |
+| `bench/timing.py`, `bench/results.py` | provided | Timing and memory helpers; CSV writer that enforces the results format |
+| `bench/core_suite.py` | provided, do not modify | The CORE suite every member runs for the hardware comparison (Part E) |
+| `bench/experiments.py` | the interns, **you finish** | Their one experiment (`example_point_lookups`) works; the rest is up to you. |
+| `datagen/synthetic.py` | the interns' stub, **you implement** | Synthetic keys and query workloads (Part B) |
+| `tests/` | provided | `test_indexes.py` (correctness), `test_synthetic.py` (your generator's spec) |
+| `analysis/` | **you write** | Notebook(s) for analysis and figures. `starter.ipynb` shows the basics. |
+| `incident_reports/` | **you write** | One performance incident report per bug (Part D) |
+| `machines.csv` | **you fill in** | One row per computer used |
+| `results/timings.csv` | **generated** | All measurements; commit it |
+| `report/REPORT_TEMPLATE.md` | provided | Structure for the PDF report |
+
+## Part A: Review the interns' code
+
+The interns couldn't explain their own code. Your team has to. You don't need to be able to write these data structures from scratch, but you do need to understand the code well enough to explain it. Read `indexes/base.py` first, then each index. Your report answers these questions, citing file and line numbers:
+
+1. For each index, what work does `search` do as the number of keys *n* grows? Give the expected big-O, and say which lines do the work.
+2. Why can't the hash table answer a range query without looking at every key?
+3. Trace inserting the keys `10, 20, 30` (in that order) into an empty AVL tree. Which rotation runs, at which line, and what does the tree look like afterwards?
+4. In the B+ tree, what is `next` on a leaf for, and which methods use it?
+5. What does each counter in `Stats` count, for each index? Why are the counters useful when you already have timings?
+
+## Part B: Finish the synthetic data generator
+
+Real data is messy; synthetic data lets you change one thing at a time. The interns wrote the docstrings and stopped. Implement the five functions in `datagen/synthetic.py`:
+
+| Function | Produces |
+|---|---|
+| `random_keys(n, length, alphabet, seed)` | *n* distinct random strings |
+| `arrange(keys, order, seed)` | the keys in `random`, `sorted`, `reversed`, or `nearly_sorted` order |
+| `point_queries(keys, n_queries, hit_rate, seed)` | lookups where an exact fraction hit and the rest miss |
+| `range_queries(keys, n_queries, selectivity, seed)` | ranges covering an exact fraction of the distinct keys |
+| `prefix_queries(keys, n_queries, prefix_length, seed)` | prefixes guaranteed to match something |
+
+The docstrings are the spec; `tests/test_synthetic.py` checks it. All randomness must come from `random.Random(seed)` so experiments are reproducible. Each function is about 5–15 lines.
+
+## Part C: Run the experiments they never ran
+
+Add your experiments to `bench/experiments.py`, following the interns' `example_point_lookups`, and run them with:
 
 ```bash
-pip install -r requirements.txt
+make experiments MEMBER=alice MACHINE=alice-mbp            # all registered experiments
+make experiments MEMBER=alice MACHINE=alice-mbp ONLY=E3_range   # just one
 ```
 
-If you add any packages to the base install, be sure to add them to the `requirements.txt` so the TAs will be able to run your programs easily.
+Every measurement goes to `results/timings.csv` through `ResultsWriter`, which checks the row format (see [Results format](#results-format)). **Name each experiment starting with its ID**, e.g. `E3_range_tempo`. Run every configuration at least **5 times** (`REPS=5`, the default).
 
-## Final Deliverable
+Required experiments (all five main indexes plus both references unless noted):
 
-1. A professional GitHub repository with your implementation. It should include a `README.md` file in the root folder giving **clear instructions on how to execute your program**.
-2. A CSV file containing the raw collected timing data. It should be stored in the `timing_data` folder of your repository. Your CSV file should be named `timing_data.csv`, and the columns of the CSV file should be the following:
-   - `run_id`: a unique id for this run of an experiment. This will help differentiate between runs of the same experiment (you should replicate each experiment multiple times and use the averages of the runs as the final result for that experiment).
-   - `compute_proc_type`: Intel i5, i7, or i9; AMD Ryzen 5, 7, or 9; Apple M1, M2, M3, or M4; or other (note this value will be the same for all runs of all experiments for one person on one machine)
-   - `primary_memory_size`: the size of the primary memory (RAM) in GB (note this value will be the same for all runs of all experiments for one person on one machine)
-   - `index_type`: the type of index used for the experiment (BST, AVL, Hash Table, or the name of the 4th data structure you chose)
-   - `num_docs_indexed`: the number of documents (individual JSON files) indexed for this experiment
-   - `num_tokens_indexed`: the number of tokens indexed for this experiment
-   - `search_set_base_size`: the value of _n_ used when generating this search data set.
-   - `search_time`: the time it took to search for the term in nanoseconds
-3. The list of documents returned for a specified search set. This should be stored in the `search_results` folder of your repository. I will provide this list to you, including the specific json files to search over. This step is to show that your search is functional.
-4. An analysis report in PDF form uploaded to GradeScope by the deadline. It should follow the structure of the template that will be provided to you.
-   - Remember, this is a data science course and the analysis performed should be robust and consistent with the level of this course and the skills gained in the prerequisites.
-   - There are several variables that you can manipulate in your experiments. Each experiment should only manipulate one variable at a time. Run your experiments in replicate in order to characterize the variability of the data.
-   - If you would like to do your data analysis and visualization generation in Jupyter (before writing your report), please include the Notebook file in the `timing_data` folder. Don't forget to add Jupyter/JupyterLab to the `requirements.txt` file. You can install Jupyter/JupyterLab in your environment via `pip install jupyterlab`.
+| ID | Question | Minimum design |
+|---|---|---|
+| **E1** | How does build cost grow with *n*? How much memory does each index use? | `track_id` in file order; at least 6 sizes from 1,000 to 114,000; record `memory_bytes` |
+| **E2** | How does point-lookup cost grow with *n*, for hits and for misses? | `track_id`; the same sizes as E1; `point_queries` with hit rates 1.0 and 0.0 |
+| **E3** | How does range-query cost depend on how much of the data the range covers? | `tempo`, all 114k rows; selectivities 0.0001, 0.001, 0.01, 0.05, 0.1, 0.25 |
+| **E4** | How does prefix-search cost depend on prefix length? | `track_name`; prefix lengths 1 through 5 |
+| **E5** | Does the order keys arrive in matter? | Synthetic keys from `random_keys`, at least 3 sizes up to 100,000; all four `arrange` orders. Record build time, lookup time, `height`, rotations and splits. |
+| **E6** | What B+ tree order is best, and does the answer depend on the operation? | `bplus_tree` only; orders 3, 4, 8, 16, 32, 64, 128, 256, 512; build, point lookups (E2 design), and ranges (E3 design at selectivity 0.01) |
+| **E7** *(teams of 4)* | What happens when many rows share a key? | `track_genre` and `popularity` (few distinct keys) vs `track_id`: build, point lookups, and range queries on `popularity` |
+
+Measurement rules:
+
+- Generate keys and queries **before** you start the timer. `time_batch` and `time_build` already handle the timer and the garbage collector.
+- Build a **fresh** index for each replicate of a build measurement.
+- Call `index.reset_stats()` before each batch you record.
+- Time **batches** (hundreds or more operations), not single operations, then divide.
+- Close other heavy apps while benchmarking, and keep laptops plugged in. Note anything unusual in the `notes` column.
+
+## Part D: Performance incident reports
+
+"All tests pass" was where the interns stopped checking. You start there. Write one report per bug you find, in `incident_reports/INC-01.md`, `INC-02.md`, … using `incident_reports/TEMPLATE.md`. Hunt for bugs the way an analyst would:
+
+1. **Compare to theory.** Plot each index's cost against *n* (log-log axes help). Does the slope match the big-O from Part A? Do the counters match what the code *should* do?
+2. **Compare indexes that should behave alike.** If two structures have the same big-O but very different curves, find out why.
+3. **Use the counters and `structure_info()`.** They are deterministic and point at *which* work is excessive.
+4. **Then read the code**, with an AI assistant if you want, to find the line responsible. You must be able to explain the bug and your fix in your own words.
+
+To fix a bug, edit the index file, run `make test` (correctness must not change), **commit**, and rerun the affected experiments. Every row records `code_version` (the git commit, with `-dirty` if `indexes/`, `datagen/` or `bench/` had uncommitted changes), so your before and after measurements stay side by side in `results/timings.csv`. Commit before every run you intend to report.
+
+Your final recommendations (Part F) must be based on the fixed code. Also test the interns' claim that the B+ tree is "the answer for everything."
+
+## Part E: Hardware comparison
+
+Each team member runs the provided CORE suite on their own computer, once on the interns' original code and once after all your fixes:
+
+```bash
+make core MEMBER=alice MACHINE=alice-mbp
+```
+
+It takes a few minutes. First add a row for your computer to `machines.csv`, taking the specs from *About This Mac* / *System Information* / `lscpu`:
+
+| Column | Example |
+|---|---|
+| `machine_id` | `alice-mbp` (letters, digits, `-`, `_`, `.`) |
+| `member` | `alice` |
+| `computer_model` | `MacBook Air 13" 2024` |
+| `cpu_model` | `Apple M3` / `Intel Core i7-1360P` / `AMD Ryzen 7 7840U` |
+| `cpu_cores` | `8` |
+| `ram_gb` | `16` |
+| `os` | `macOS 26.0` |
+| `docker_cpus`, `docker_memory_gb` | from Docker Desktop → Settings → Resources |
+| `power` | `plugged in` or `battery` |
+
+Docker means everyone runs the same software (Python version, packages, settings), so differences in the CORE results come from the hardware and its load. In your report, answer:
+
+1. Are the operation counters identical across machines for the same `code_version`? They should be. If they aren't, explain why.
+2. For each index and operation, how much faster is the fastest machine than the slowest? Is that ratio the same across indexes and operations, or do some workloads benefit more from faster hardware?
+3. Does the *ranking* of the indexes change from machine to machine?
+4. How variable are repeated runs on each machine (e.g. coefficient of variation)? Is any machine noticeably noisier, and why might that be?
+5. Using your E1 `memory_bytes`, how much RAM does each index need for the Spotify data? Could the RAM differences between your machines affect these results? At what dataset size would they start to?
+
+Note: on macOS and Windows, Docker runs inside a Linux virtual machine. Inside the container, `cpu_count` and `mem_total_gb` describe that VM, which is why `machines.csv` records the real hardware.
+
+## Part F: Report
+
+Submit a PDF to Gradescope following `report/REPORT_TEMPLATE.md`. Write it as the report the interns should have delivered. Expectations for a data science course:
+
+- **Show variability, not just averages.** Report medians with intervals or interquartile ranges across replicates.
+- **Estimate how cost grows, don't eyeball it.** Fit log-log slopes, or regress against log *n*, and compare with theory.
+- **Identify crossovers.** At what *n*, selectivity, or prefix length does the best index change?
+- **Make a recommendation per feature (F1–F4)**, with the evidence and the trade-offs: build cost, memory, and whether the index can answer the query at all.
+- Discuss what the C-backed reference indexes tell you about Python-level constant factors versus big-O.
+
+## Results format
+
+`ResultsWriter` writes one row per timed batch to `results/timings.csv`. You supply:
+
+| Column | Meaning |
+|---|---|
+| `experiment` | `CORE`, or your experiment name starting with its ID (`E3_range_tempo`) |
+| `dataset` | `spotify` or `synthetic` |
+| `key_column` | Spotify column, or a label for synthetic keys |
+| `insert_order` | `file`, `random`, `sorted`, `reversed`, `nearly_sorted` |
+| `n_keys` | (key, value) pairs inserted |
+| `operation` | `build`, `point_hit`, `point_miss`, `point_mixed`, `range`, `prefix` |
+| `operation_param` | hit rate, selectivity, or prefix length (blank for builds) |
+| `n_ops` | operations in the batch (= `n_keys` for builds) |
+| `rep` | replicate number |
+| `total_ns` | elapsed nanoseconds for the batch |
+| `height`, `memory_bytes`, `notes` | optional |
+
+Filled in automatically: `session_id`, `timestamp_utc`, `member`, `machine_id`, `code_version`, `python_version`, `os`, `arch`, `cpu_model_detected`, `cpu_count`, `mem_total_gb`, `in_docker`, `pythonhashseed`, `index_type`, `index_param`, and the counters `comparisons`, `nodes_visited`, `rotations`, `splits`, `resizes` (blank for the reference indexes).
+
+## Deliverables
+
+1. **GitHub repository** (GitHub Classroom) containing:
+   - your `datagen/synthetic.py`, `bench/experiments.py`, and bug fixes in `indexes/`
+   - `results/timings.csv`: every measurement, including CORE runs from every member before and after your fixes
+   - `machines.csv`
+   - `incident_reports/INC-*.md`
+   - `analysis/`: the notebook(s) that produce every figure and table in your report
+2. **PDF report** on Gradescope.
+
+Before submitting, run `make check`. It runs the tests and checks that the results file, machines, CORE runs, required experiments, and incident reports are all present and well formed. Graders run the same command.
+
+## Rules
+
+- I expect you to fully understand, line by line, and *be able to explain in person* anything you submit with your name on it.
+  - What does this mean for coding assistants and LLMs? Used well, they are great tools for understanding material and for help with coding and debugging. Blindly pasting assistant output is no more acceptable than pasting code from GitHub or a textbook. If you can't explain it, don't submit it.
+  - If you're struggling to understand code you found or that an assistant produced, ask me or a TA. We're glad to help.
+- Do not modify `indexes/base.py`, `indexes/reference.py`, `bench/core_suite.py`, `bench/timing.py`, `bench/results.py`, or the tests. Fixing bugs means changing code in the five index files.
+- All measurements must be taken inside the provided Docker container.
